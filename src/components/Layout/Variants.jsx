@@ -61,7 +61,9 @@ const Variants = ({ product }) => {
               <input
                 type="text"
                 value={option.option}
-                onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
+                onChange={(e) =>
+                  handleOptionChange(optionIndex, e.target.value)
+                }
                 className="w-full h-10 border-2 border-gray-200 rounded-lg pl-4"
               />
             </div>
@@ -72,7 +74,9 @@ const Variants = ({ product }) => {
                   <input
                     type="text"
                     value={value}
-                    onChange={(e) => handleValueChange(optionIndex, valueIndex, e.target.value)}
+                    onChange={(e) =>
+                      handleValueChange(optionIndex, valueIndex, e.target.value)
+                    }
                     className="w-full h-10 border-2 border-gray-200 rounded-lg pl-4"
                   />
                   <RiDeleteBinLine
@@ -85,7 +89,10 @@ const Variants = ({ product }) => {
             </div>
           </div>
         ))}
-        <div className="text-primary text-sm font-medium cursor-pointer" onClick={handleAddOption}>
+        <div
+          className="text-primary text-sm font-medium cursor-pointer"
+          onClick={handleAddOption}
+        >
           + Add Option
         </div>
       </div>

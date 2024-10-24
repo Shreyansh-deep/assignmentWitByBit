@@ -99,7 +99,11 @@ const Description = ({ product, setProduct }) => {
             />
           </label>
           {image && (
-            <img src={image} alt="Product" className="mt-2 w-32 h-32 object-cover rounded-lg" />
+            <img
+              src={image}
+              alt="Product"
+              className="mt-2 w-32 h-32 object-cover rounded-lg"
+            />
           )}
         </div>
       </div>

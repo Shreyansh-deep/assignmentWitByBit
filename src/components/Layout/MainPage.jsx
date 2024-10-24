@@ -7,6 +7,8 @@ import Variants from "./Variants";
 import Description from "./Description";
 import Combination from "./Combination";
 import PriceInfo from "./PriceInfo";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MainPage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -76,6 +78,8 @@ const MainPage = () => {
       case "combinations":
         setCurrentSection("priceInfo");
         break;
+      case "priceInfo":
+        toast("Product Added Successfully!!!!");
       default:
         break;
     }
@@ -84,7 +88,7 @@ const MainPage = () => {
   const goToPreviousSection = () => {
     switch (currentSection) {
       case "hero":
-        toggleModal()
+        toggleModal();
       case "description":
         setCurrentSection("hero");
         break;
@@ -154,6 +158,7 @@ const MainPage = () => {
           setProduct={setProduct}
         />
       )}
+      <ToastContainer />
     </div>
   );
 };
