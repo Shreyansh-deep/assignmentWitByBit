@@ -80,6 +80,7 @@ const MainPage = () => {
         break;
       case "priceInfo":
         toast("Product Added Successfully!!!!");
+        break;
       default:
         break;
     }
@@ -89,6 +90,7 @@ const MainPage = () => {
     switch (currentSection) {
       case "hero":
         toggleModal();
+        break;
       case "description":
         setCurrentSection("hero");
         break;

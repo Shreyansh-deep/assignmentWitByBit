@@ -21,11 +21,6 @@ const Variants = ({ product }) => {
     setOptions(newOptions);
   };
 
-  const handleAddValue = (index) => {
-    const newOptions = [...options];
-    newOptions[index].values.push("");
-    setOptions(newOptions);
-  };
 
   const handleRemoveValue = (optionIndex, valueIndex) => {
     const newOptions = [...options];
