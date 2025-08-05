@@ -1,95 +1,79 @@
 import React, { useState, useEffect } from "react";
 import EntryForm from "./components/EntryForm";
 import EntryList from "./components/EntryList";
-import { saveToLocal, loadFromLocal } from "./utils/localStorage";
 
-function App() {
+const App = () => {
   const [entries, setEntries] = useState([]);
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterCategory, setFilterCategory] = useState("all");
 
   useEffect(() => {
-    const saved = loadFromLocal();
-    if (saved) setEntries(saved);
+    const stored = JSON.parse(localStorage.getItem("skillup-entries") || "[]");
+    setEntries(stored);
   }, []);
 
-  const addEntry = (entry) => {
-    const updated = [entry, ...entries];
-    setEntries(updated);
-    saveToLocal(updated);
+  useEffect(() => {
+    localStorage.setItem("skillup-entries", JSON.stringify(entries));
+  }, [entries]);
+
+  const addOrUpdateEntry = (entry) => {
+    if (editingEntry) {
+      setEntries((prev) => prev.map((e) => (e.id === entry.id ? entry : e)));
+      setEditingEntry(null);
+    } else {
+      setEntries((prev) => [...prev, { ...entry, id: Date.now() }]);
+    }
   };
 
-  const deleteEntry = (id) => {
-    const updated = entries.filter((e) => e.id !== id);
-    setEntries(updated);
-    saveToLocal(updated);
-  };
-
-  const updateEntry = (updatedEntry) => {
-    const updated = entries.map((entry) =>
-      entry.id === updatedEntry.id ? updatedEntry : entry
-    );
-    setEntries(updated);
-    saveToLocal(updated);
-  };
-
-  const filteredEntries = entries.filter((e) => {
-    const statusMatch = statusFilter === "All" || e.status === statusFilter;
-    const categoryMatch =
-      categoryFilter === "All" || e.category === categoryFilter;
-    return statusMatch && categoryMatch;
-  });
+  const handleEdit = (entry) => setEditingEntry(entry);
+  const handleDelete = (id) =>
+    setEntries((prev) => prev.filter((entry) => entry.id !== id));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 to-black text-white p-6">
-      <h1 className="text-4xl font-bold mb-8 text-center">
-        📘 Shrey’s Skill Up Tracker
+    <div className="min-h-screen bg-gradient-to-b from-purple-900 to-black text-white px-4 py-10">
+      <h1 className="text-center text-4xl font-bold mb-6">
+        Shreyansh’s Skill Up Tracker 🚀
       </h1>
 
-      {/* Filter Tabs */}
-      <div className="flex justify-center gap-4 mb-6">
-        {["All", "Learning", "Completed"].map((status) => (
-          <button
-            key={status}
-            onClick={() => setStatusFilter(status)}
-            className={`px-4 py-2 rounded-full font-medium transition ${
-              statusFilter === status
-                ? "bg-white text-black"
-                : "bg-purple-800 text-white hover:bg-purple-700"
-            }`}
-          >
-            {status}
-          </button>
-        ))}
-      </div>
+      <div className="flex justify-between mt-14">
+        <EntryForm onSubmit={addOrUpdateEntry} editingEntry={editingEntry} />
 
-      {/* Category Filters */}
-      <div className="flex justify-center gap-4 mb-6 flex-wrap">
-        {["All", "Frontend", "Backend", "DevOps", "Design", "Others"].map(
-          (cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategoryFilter(cat)}
-              className={`px-4 py-2 rounded-full font-medium transition ${
-                categoryFilter === cat
-                  ? "bg-white text-black"
-                  : "bg-indigo-800 text-white hover:bg-indigo-700"
-              }`}
+        <div className="flex-1 max-w-[50%] px-5 ">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="bg-gray-800 text-white px-3 py-2 rounded-md"
             >
-              {cat}
-            </button>
-          )
-        )}
-      </div>
+              <option value="all">All Status</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
 
-      <EntryForm onAdd={addEntry} />
-      <EntryList
-        entries={filteredEntries}
-        onDelete={deleteEntry}
-        onEdit={updateEntry}
-      />
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="bg-gray-800 text-white px-3 py-2 rounded-md"
+            >
+              <option value="all">All Categories</option>
+              <option value="frontend">Frontend</option>
+              <option value="backend">Backend</option>
+              <option value="devops">DevOps</option>
+              <option value="soft-skills">Soft Skills</option>
+            </select>
+          </div>
+          <EntryList
+            entries={entries}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            filterStatus={filterStatus}
+            filterCategory={filterCategory}
+          />
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default App;

@@ -1,149 +1,123 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 
-const defaultForm = {
-  topic: "",
-  resource: "",
-  notes: "",
-  status: "",
-  progress: null,
-  category: "Frontend",
-};
+const EntryForm = ({ onSubmit, editingEntry, className }) => {
+  const [title, setTitle] = useState("");
+  const [source, setSource] = useState("")
+  const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState("in-progress");
+  const [category, setCategory] = useState("frontend");
 
-export default function EntryForm({ onAdd }) {
-  const [formData, setFormData] = useState(defaultForm);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "progress" ? Number(value) : value,
-    }));
-  };
+  useEffect(() => {
+    if (editingEntry) {
+      setTitle(editingEntry.title);
+      setSource(editingEntry.source)
+      setNotes(editingEntry.notes);
+      setStatus(editingEntry.status);
+      setCategory(editingEntry.category);
+    }
+  }, [editingEntry]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.topic.trim() || !formData.resource.trim()) return;
+    if (!title.trim()) return;
 
     const newEntry = {
-      ...formData,
-      id: Date.now(), // simple unique ID
-      date: new Date().toLocaleDateString(),
+      id: editingEntry?.id || Date.now(),
+      title,
+      source,
+      notes,
+      status,
+      category,
     };
 
-    onAdd(newEntry);
-    setFormData(defaultForm);
+    onSubmit(newEntry);
+    setTitle("");
+    setSource("")
+    setNotes("");
+    setStatus("in-progress");
+    setCategory("frontend");
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white text-black p-6 rounded-2xl shadow-lg mb-8 max-w-2xl mx-auto"
+      className="max-w-xl mx-auto space-y-4 bg-gray-900 p-6 rounded-lg shadow-lg flex-1"
     >
-      <h2 className="text-xl font-semibold mb-4">Add New Learning Entry</h2>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="relative w-full">
-          <input
-            type="text"
-            name="topic"
-            value={formData.topic}
-            onChange={handleChange}
-            required
-            className="peer w-full p-2 pt-5 border rounded outline-none"
-            placeholder=" "
-          />
-          <label className="absolute left-2 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-1 peer-focus:text-xs">
-            Topic
+      <div className="relative">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Learning Topic"
+          className="w-full bg-gray-800 text-white px-4 py-3 rounded focus:outline-none focus:ring focus:ring-purple-500"
+        />
+        {title && (
+          <label className="absolute top-0 left-3 text-xs text-purple-400">
+            Learning Topic
           </label>
-        </div>
+        )}
+      </div>
 
-        <div className="relative w-full">
-          <input
-            type="url"
-            name="resource"
-            value={formData.resource}
-            onChange={handleChange}
-            required
-            className="peer w-full p-2 pt-5 border rounded outline-none"
-            placeholder=" "
-          />
-          <label className="absolute left-2 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-1 peer-focus:text-xs">
-            Resource Link
+      <div className="relative">
+        <input
+          type="text"
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          placeholder="Learning Source"
+          className="w-full bg-gray-800 text-white px-4 py-3 rounded focus:outline-none focus:ring focus:ring-purple-500"
+        />
+        {source && (
+          <label className="absolute top-0 left-3 text-xs text-purple-400">
+            Learning Source
           </label>
-        </div>
+        )}
+      </div>
 
-        <div className="relative w-full">
-          <input
-            type="number"
-            name="progress"
-            value={formData.progress}
-            onChange={handleChange}
-            min="0"
-            max="100"
-            className="peer w-full p-2 pt-5 border rounded outline-none"
-            placeholder=" "
-          />
-          <label className="absolute left-2 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-1 peer-focus:text-xs">
-            Progress %
+      <div className="relative">
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Notes / Summary"
+          className="w-full bg-gray-800 text-white px-4 py-3 rounded resize-none focus:outline-none focus:ring focus:ring-purple-500"
+          rows={3}
+        />
+        {notes && (
+          <label className="absolute top-0 left-3 text-xs text-purple-400">
+            Notes
           </label>
-        </div>
+        )}
+      </div>
 
-        <div className="relative w-full">
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="peer w-full p-2 pt-5 border rounded outline-none"
-          >
-            <option value="">Select Status</option>
-            <option value="Learning">Learning</option>
-            <option value="Completed">Completed</option>
-          </select>
-          <label className="absolute left-2 top-2 text-gray-500 text-sm transition-all peer-focus:top-1 peer-focus:text-xs">
-            Status
-          </label>
-        </div>
+      <div className="flex gap-4 flex-wrap">
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="flex-1 bg-gray-800 text-white px-4 py-2 rounded"
+        >
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
 
-        <div className="relative w-full">
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="peer w-full p-2 pt-5 border rounded outline-none"
-          >
-            <option value="">Select Category</option>
-            <option value="Frontend">Frontend</option>
-            <option value="Backend">Backend</option>
-            <option value="DevOps">DevOps</option>
-            <option value="Design">Design</option>
-            <option value="Others">Others</option>
-          </select>
-          <label className="absolute left-2 top-2 text-gray-500 text-sm transition-all peer-focus:top-1 peer-focus:text-xs">
-            Category
-          </label>
-        </div>
-
-        <div className="relative w-full sm:col-span-2">
-          <textarea
-            name="notes"
-            rows="2"
-            value={formData.notes}
-            onChange={handleChange}
-            className="peer w-full p-2 pt-5 border rounded outline-none resize-none"
-            placeholder=" "
-          />
-          <label className="absolute left-2 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:top-1 peer-focus:text-xs">
-            Any notes or doubts?
-          </label>
-        </div>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="flex-1 bg-gray-800 text-white px-4 py-2 rounded"
+        >
+          <option value="frontend">Frontend</option>
+          <option value="backend">Backend</option>
+          <option value="devops">DevOps</option>
+          <option value="soft-skills">Soft Skills</option>
+        </select>
       </div>
 
       <button
         type="submit"
-        className="mt-4 bg-purple-700 hover:bg-purple-800 text-white font-bold py-2 px-6 rounded"
+        className="w-full bg-purple-600 hover:bg-purple-700 transition-all duration-200 text-white font-semibold py-2 px-4 rounded"
       >
-        Add Entry
+        {editingEntry ? "Update Entry" : "Add Entry"}
       </button>
     </form>
   );
-}
+};
+
+export default EntryForm;

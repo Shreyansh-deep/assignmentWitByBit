@@ -1,144 +1,86 @@
-import React, { useState } from "react";
-import ProgressBar from "./ProgressBar";
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
-export default function EntryList({ entries, onDelete, onEdit }) {
-  const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({});
-
-  const startEdit = (entry) => {
-    setEditingId(entry.id);
-    setEditData({ ...entry });
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const saveEdit = () => {
-    onEdit({ ...editData, progress: Number(editData.progress) });
-    setEditingId(null);
-  };
+const EntryList = ({
+  entries,
+  onEdit,
+  onDelete,
+  filterStatus,
+  filterCategory,
+}) => {
+  const filteredEntries = entries.filter((entry) => {
+    const statusMatch = filterStatus === "all" || entry.status === filterStatus;
+    const categoryMatch =
+      filterCategory === "all" || entry.category === filterCategory;
+    return statusMatch && categoryMatch;
+  });
 
   return (
-    <div className="max-w-4xl mx-auto grid gap-6">
-      {entries.map((entry) => {
-        const isEditing = editingId === entry.id;
-
-        return (
-          <div
+    <div className="mt-6 max-w-[80%] mx-auto space-y-4">
+      <AnimatePresence>
+        {filteredEntries.map((entry) => (
+          <motion.div
             key={entry.id}
-            className="bg-white text-black p-4 rounded-xl shadow flex flex-col gap-4"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="relative bg-gray-800 p-4 rounded-xl shadow-sm text-white"
           >
-            {isEditing ? (
-              <>
-                <input
-                  name="topic"
-                  value={editData.topic}
-                  onChange={handleChange}
-                  className="p-2 border rounded"
-                />
-                <input
-                  name="resource"
-                  value={editData.resource}
-                  onChange={handleChange}
-                  className="p-2 border rounded"
-                />
-                <textarea
-                  name="notes"
-                  value={editData.notes}
-                  onChange={handleChange}
-                  className="p-2 border rounded"
-                />
-                <select
-                  name="status"
-                  value={editData.status}
-                  onChange={handleChange}
-                  className="p-2 border rounded"
-                >
-                  <option value="Learning">Learning</option>
-                  <option value="Completed">Completed</option>
-                </select>
-                <select
-                  name="category"
-                  value={editData.category}
-                  onChange={handleChange}
-                  className="p-2 border rounded"
-                >
-                  <option value="Frontend">Frontend</option>
-                  <option value="Backend">Backend</option>
-                  <option value="DevOps">DevOps</option>
-                  <option value="Design">Design</option>
-                  <option value="Others">Others</option>
-                </select>
+            <div className="absolute top-2 right-2 flex space-x-2">
+              <button
+                onClick={() => onEdit(entry)}
+                className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-sm transition"
+              >
+                <FaEdit /> Edit
+              </button>
+              <button
+                onClick={() => onDelete(entry.id)}
+                className="flex items-center gap-1 bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-sm transition"
+              >
+                <FaTrash /> Delete
+              </button>
+            </div>
 
-                <input
-                  name="progress"
-                  type="number"
-                  value={editData.progress}
-                  onChange={handleChange}
-                  className="p-2 border rounded"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={saveEdit}
-                    className="bg-green-600 text-white px-4 py-1 rounded"
+            <div className="flex gap-4 text-center items-center">
+              <p className="text-sm font-semibold text-purple-400 ">TOPIC : </p>
+              <p>{entry.title}</p>
+            </div>
+            <div className="flex gap-4 items-center">
+              <p className="text-sm font-semibold text-purple-400">Source : </p>
+              <p className="text-sm underline cursor-pointer">{entry.source}</p>
+            </div>
+            <div className="text-sm text-gray-300 mt-1 flex gap-4 items-center">
+              <p className="font-semibold text-purple-400">Notes : </p>
+              {entry.notes}
+            </div>
+
+            <div className="flex justify-between">
+              <div className="flex items-center text-sm text-purple-400 mt-1 gap-4">
+                <p className="font-semibold">Status :</p>
+                {entry.status && (
+                  <p
+                    className={`capitalize px-3 py-1 text-xs rounded-full text-black font-semibold ${
+                      entry.status === "completed"
+                        ? "bg-green-400"
+                        : "bg-lime-400"
+                    }`}
                   >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="bg-gray-400 text-white px-4 py-1 rounded"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h3 className="text-lg font-semibold text-purple-800">
-                  {entry.topic}
-                </h3>
-                <p className="text-sm">📅 {entry.date}</p>
-                <p className="text-sm text-indigo-600">📂 {entry.category}</p>
-                <a
-                  href={entry.resource}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-blue-600 underline text-sm"
-                >
-                  View Resource
-                </a>
-                {entry.notes && <p className="text-sm">📝 {entry.notes}</p>}
-                <span
-                  className={`text-xs font-medium px-2 py-1 rounded-full ${
-                    entry.status === "Completed"
-                      ? "bg-green-200 text-green-800"
-                      : "bg-yellow-200 text-yellow-800"
-                  }`}
-                >
-                  {entry.status}
-                </span>
-                <ProgressBar percent={entry.progress} />
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => startEdit(entry)}
-                    className="bg-blue-600 text-white px-4 py-1 rounded"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => onDelete(entry.id)}
-                    className="bg-red-600 text-white px-4 py-1 rounded"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        );
-      })}
+                    {entry.status}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center text-xs text-purple-400 mt-1 gap-4">
+                <p className="font-semibold">Category :</p>
+                <p className="capitalize text-gray-300">{entry.category}</p>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
-}
+};
+
+export default EntryList;
